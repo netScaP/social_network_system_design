@@ -209,10 +209,50 @@ paths:
                           properties:
                             id:
                               type: string
-                            user:
-                              $ref: "#/components/schemas/UserModel"
+                            title:
+                              type: string
+                            unreadCount:
+                              type: number
+                            type:
+                              type: string
+                              enum:
+                                - personal
+                                - group
                             lastMessage:
                               $ref: "#/components/schemas/MessageModel"
+    post:
+      operationId: chats_create
+      tags:
+        - chats
+      summary: Create new chat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  enum:
+                    - personal
+                    - group
+                userId:
+                  type: string
+                usersIds:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
   "/chats/{chatId}":
     get:
       operationId: chat_info
@@ -227,13 +267,14 @@ paths:
             type: string
       responses:
         "200":
-          description: ""
+          description: "Personal chat info"
           content:
             application/json:
               schema:
-                properties:
-                  user:
-                    $ref: "#/components/schemas/UserModel"
+                oneOf:
+                  - $ref: "#/components/schemas/ChatPersonalModel"
+                  - $ref: "#/components/schemas/ChatGroupModel"
+
   "/chats/{chatId}/messages":
     get:
       operationId: chats_messages_list
@@ -262,17 +303,12 @@ paths:
                         type: array
                         items:
                           $ref: "#/components/schemas/MessageModel"
+  "/chats/messages":
     post:
       operationId: message_create
       tags:
         - chats
       summary: Create chat message
-      parameters:
-        - name: chatId
-          in: path
-          required: true
-          schema:
-            type: string
       requestBody:
         required: true
         content:
@@ -281,6 +317,10 @@ paths:
               type: object
               properties:
                 content:
+                  type: string
+                chatId:
+                  type: string
+                userId:
                   type: string
       responses:
         "200":
@@ -407,8 +447,8 @@ components:
       properties:
         id:
           type: string
-        userId:
-          type: string
+        user:
+          $ref: "#/components/schemas/UserModel"
         content:
           type: string
           example: News
@@ -417,6 +457,50 @@ components:
           example: "YYYY-MM-DDTHH:mm:ss"
       required:
         - id
-        - userId
+        - user
         - content
+        - createdAt
+
+    ChatPersonalModel:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        unreadCount:
+          type: number
+        user:
+          $ref: "#/components/schemas/UserModel"
+        createdAt:
+          type: string
+          example: "YYYY-MM-DDTHH:mm:ss"
+      required:
+        - id
+        - title
+        - unreadCount
+        - user
+        - createdAt
+
+    ChatGroupModel:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        unreadCount:
+          type: number
+        users:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserModel"
+        createdAt:
+          type: string
+          example: "YYYY-MM-DDTHH:mm:ss"
+      required:
+        - id
+        - title
+        - unreadCount
+        - users
         - createdAt
