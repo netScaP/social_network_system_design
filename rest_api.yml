@@ -29,6 +29,12 @@ paths:
                         type: array
                         items:
                           $ref: "#/components/schemas/UserModel"
+        "400":
+          $ref: "#/responses/BadRequest"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "500":
+          $ref: "#/responses/InternalServer"
   "/users/{userId}/friends":
     get:
       operationId: users_friends_list
@@ -57,6 +63,12 @@ paths:
                         type: array
                         items:
                           $ref: "#/components/schemas/UserModel"
+        "400":
+          $ref: "#/responses/BadRequest"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "500":
+          $ref: "#/responses/InternalServer"
   "/users/{userId}":
     get:
       operationId: user_info
@@ -76,6 +88,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserModel"
+        "400":
+          $ref: "#/responses/BadRequest"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "404":
+          $ref: "#/responses/NotFound"
+        "500":
+          $ref: "#/responses/InternalServer"
 
   "/feeds":
     get:
@@ -104,6 +124,12 @@ paths:
                             - properties:
                                 user:
                                   $ref: "#/components/schemas/UserModel"
+        "400":
+          $ref: "#/responses/BadRequest"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "500":
+          $ref: "#/responses/InternalServer"
     post:
       operationId: feeds_create
       tags:
@@ -132,6 +158,12 @@ paths:
                 properties:
                   id:
                     type: string
+        "400":
+          $ref: "#/responses/BadRequest"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "500":
+          $ref: "#/responses/InternalServer"
   "/feeds/user/{userId}":
     get:
       operationId: users_feeds_list
@@ -160,6 +192,14 @@ paths:
                         type: array
                         items:
                           $ref: "#/components/schemas/UserModel"
+        "400":
+          $ref: "#/responses/BadRequest"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "404":
+          $ref: "#/responses/NotFound"
+        "500":
+          $ref: "#/responses/InternalServer"
   "/feeds/my":
     get:
       operationId: my_feeds_list
@@ -183,6 +223,14 @@ paths:
                         type: array
                         items:
                           $ref: "#/components/schemas/UserModel"
+        "400":
+          $ref: "#/responses/BadRequest"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "404":
+          $ref: "#/responses/NotFound"
+        "500":
+          $ref: "#/responses/InternalServer"
 
   "/chats":
     get:
@@ -220,6 +268,12 @@ paths:
                                 - group
                             lastMessage:
                               $ref: "#/components/schemas/MessageModel"
+        "400":
+          $ref: "#/responses/BadRequest"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "500":
+          $ref: "#/responses/InternalServer"
     post:
       operationId: chats_create
       tags:
@@ -253,6 +307,14 @@ paths:
                 properties:
                   id:
                     type: string
+        "400":
+          $ref: "#/responses/BadRequest"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "404":
+          $ref: "#/responses/NotFound"
+        "500":
+          $ref: "#/responses/InternalServer"
   "/chats/{chatId}":
     get:
       operationId: chat_info
@@ -274,6 +336,14 @@ paths:
                 oneOf:
                   - $ref: "#/components/schemas/ChatPersonalModel"
                   - $ref: "#/components/schemas/ChatGroupModel"
+        "400":
+          $ref: "#/responses/BadRequest"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "404":
+          $ref: "#/responses/NotFound"
+        "500":
+          $ref: "#/responses/InternalServer"
 
   "/chats/{chatId}/messages":
     get:
@@ -303,6 +373,14 @@ paths:
                         type: array
                         items:
                           $ref: "#/components/schemas/MessageModel"
+        "400":
+          $ref: "#/responses/BadRequest"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "404":
+          $ref: "#/responses/NotFound"
+        "500":
+          $ref: "#/responses/InternalServer"
   "/chats/messages":
     post:
       operationId: message_create
@@ -332,6 +410,14 @@ paths:
                 properties:
                   id:
                     type: string
+        "400":
+          $ref: "#/responses/BadRequest"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "404":
+          $ref: "#/responses/NotFound"
+        "500":
+          $ref: "#/responses/InternalServer"
 
   "/uploads":
     post:
@@ -359,6 +445,12 @@ paths:
                 properties:
                   id:
                     type: string
+        "400":
+          $ref: "#/responses/BadRequest"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "500":
+          $ref: "#/responses/InternalServer"
   "/uploads/{uploadId}/file":
     get:
       operationId: uploads_file
@@ -379,6 +471,14 @@ paths:
               schema:
                 type: string
                 format: binary
+        "400":
+          $ref: "#/responses/BadRequest"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "404":
+          $ref: "#/responses/NotFound"
+        "500":
+          $ref: "#/responses/InternalServer"
 
 tags:
   - name: users
@@ -389,6 +489,59 @@ tags:
     description: "Chats"
   - name: uploads
     description: "Uploads"
+
+responses:
+  BadRequest:
+    description: Bad request exception
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            timestamp:
+              type: string
+            message:
+              type: string
+            fields:
+              type: object
+              properties:
+                field:
+                  type: array
+                  items:
+                    type: string
+  NotAuthorized:
+    description: The requester is unauthorized.
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            timestamp:
+              type: string
+            message:
+              type: string
+  NotFound:
+    description: Not found error.
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            timestamp:
+              type: string
+            message:
+              type: string
+  InternalServer:
+    description: Internal server error.
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            timestamp:
+              type: string
+            message:
+              type: string
 
 components:
   parameters:
@@ -452,6 +605,8 @@ components:
         content:
           type: string
           example: News
+        isRead:
+          type: boolean
         createdAt:
           type: string
           example: "YYYY-MM-DDTHH:mm:ss"
@@ -459,6 +614,7 @@ components:
         - id
         - user
         - content
+        - isRead
         - createdAt
 
     ChatPersonalModel:
