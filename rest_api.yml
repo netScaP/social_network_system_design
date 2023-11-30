@@ -5,6 +5,19 @@ info:
   version: "1.0"
   contact: {}
 
+security:
+  - bearerAuth: []
+
+tags:
+  - name: users
+    description: "Users"
+  - name: feeds
+    description: "Feeds"
+  - name: chats
+    description: "Chats"
+  - name: uploads
+    description: "Uploads"
+
 paths:
   "/users":
     get:
@@ -65,6 +78,58 @@ paths:
                           $ref: "#/components/schemas/UserModel"
         "400":
           $ref: "#/responses/BadRequest"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "404":
+          $ref: "#/responses/NotFound"
+        "500":
+          $ref: "#/responses/InternalServer"
+  "/users/my/friends":
+    get:
+      operationId: my_friends_list
+      tags:
+        - users
+      summary: Get my friends list
+      parameters:
+        - $ref: "#/components/parameters/NextCursor"
+        - $ref: "#/components/parameters/Size"
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Pagination"
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/UserModel"
+        "400":
+          $ref: "#/responses/BadRequest"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "500":
+          $ref: "#/responses/InternalServer"
+  "/users/my/friends/{friendId}":
+    delete:
+      operationId: remove_my_friend
+      tags:
+        - users
+      summary: Remove my friend
+      parameters:
+        - name: friendId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: ""
+        "404":
+          $ref: "#/responses/NotFound"
         "401":
           $ref: "#/responses/NotAuthorized"
         "500":
@@ -231,6 +296,67 @@ paths:
           $ref: "#/responses/NotFound"
         "500":
           $ref: "#/responses/InternalServer"
+  "/feeds/my/{feedId}":
+    put:
+      operationId: update_my_feed
+      tags:
+        - feeds
+      summary: Update my feed
+      parameters:
+        - name: feedId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                uploadsIds:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+        "400":
+          $ref: "#/responses/BadRequest"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "500":
+          $ref: "#/responses/InternalServer"
+    delete:
+      operationId: remove_my_feed
+      tags:
+        - feeds
+      summary: Remove my feed
+      parameters:
+        - name: feedId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: ""
+        "404":
+          $ref: "#/responses/NotFound"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "500":
+          $ref: "#/responses/InternalServer"
 
   "/chats":
     get:
@@ -381,6 +507,78 @@ paths:
           $ref: "#/responses/NotFound"
         "500":
           $ref: "#/responses/InternalServer"
+  "/chats/{chatId}/messages/{messageId}":
+    put:
+      operationId: update_my_message
+      tags:
+        - chats
+      summary: Update my message
+      parameters:
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: messageId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+        "400":
+          $ref: "#/responses/BadRequest"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "500":
+          $ref: "#/responses/InternalServer"
+    delete:
+      operationId: remove_my_message
+      tags:
+        - chats
+      summary: Remove my message
+      parameters:
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: messageId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: isForEveryone
+          in: query
+          required: true
+          schema:
+            type: boolean
+      responses:
+        "204":
+          description: ""
+        "404":
+          $ref: "#/responses/NotFound"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "500":
+          $ref: "#/responses/InternalServer"
   "/chats/messages":
     post:
       operationId: message_create
@@ -480,16 +678,6 @@ paths:
         "500":
           $ref: "#/responses/InternalServer"
 
-tags:
-  - name: users
-    description: "Users"
-  - name: feeds
-    description: "Feeds"
-  - name: chats
-    description: "Chats"
-  - name: uploads
-    description: "Uploads"
-
 responses:
   BadRequest:
     description: Bad request exception
@@ -544,6 +732,12 @@ responses:
               type: string
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT # optional, for documentation purposes only
+
   parameters:
     NextCursor:
       name: nextCursor
