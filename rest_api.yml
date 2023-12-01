@@ -48,18 +48,18 @@ paths:
           $ref: "#/responses/NotAuthorized"
         "500":
           $ref: "#/responses/InternalServer"
-  "/users/{userId}/friends":
+  "/users/friends":
     get:
-      operationId: users_friends_list
+      operationId: friends_list
       tags:
         - users
-      summary: Get users friends list
+      summary: Get my friends list or friends of other user
       parameters:
         - $ref: "#/components/parameters/NextCursor"
         - $ref: "#/components/parameters/Size"
         - name: userId
-          in: path
-          required: true
+          in: query
+          required: false
           schema:
             type: string
       responses:
@@ -80,40 +80,9 @@ paths:
           $ref: "#/responses/BadRequest"
         "401":
           $ref: "#/responses/NotAuthorized"
-        "404":
-          $ref: "#/responses/NotFound"
         "500":
           $ref: "#/responses/InternalServer"
-  "/users/my/friends":
-    get:
-      operationId: my_friends_list
-      tags:
-        - users
-      summary: Get my friends list
-      parameters:
-        - $ref: "#/components/parameters/NextCursor"
-        - $ref: "#/components/parameters/Size"
-      responses:
-        "200":
-          description: ""
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/Pagination"
-                  - type: object
-                    properties:
-                      items:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/UserModel"
-        "400":
-          $ref: "#/responses/BadRequest"
-        "401":
-          $ref: "#/responses/NotAuthorized"
-        "500":
-          $ref: "#/responses/InternalServer"
-  "/users/my/friends/{friendId}":
+  "/users/friends/{friendId}":
     delete:
       operationId: remove_my_friend
       tags:
@@ -152,7 +121,22 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserModel"
+                type: object
+                properties:
+                  id:
+                    type: string
+                  fullName:
+                    type: string
+                    example: Ivanov Ivan
+                  cityName:
+                    type: string
+                  lastSeenAt:
+                    type: string
+                required:
+                  - id
+                  - fullName
+                  - cityName
+                  - lastSeenAt
         "400":
           $ref: "#/responses/BadRequest"
         "401":
@@ -167,10 +151,15 @@ paths:
       operationId: feeds_list
       tags:
         - feeds
-      summary: Get feeds list
+      summary: Get my feeds list or users feeds
       parameters:
         - $ref: "#/components/parameters/NextCursor"
         - $ref: "#/components/parameters/Size"
+        - name: userId
+          in: query
+          required: false
+          schema:
+            type: string
       responses:
         "200":
           description: ""
@@ -195,11 +184,12 @@ paths:
           $ref: "#/responses/NotAuthorized"
         "500":
           $ref: "#/responses/InternalServer"
+  "/posts":
     post:
-      operationId: feeds_create
+      operationId: feed_post_create
       tags:
         - feeds
-      summary: Create feed
+      summary: Create a new post
       requestBody:
         required: true
         content:
@@ -229,81 +219,14 @@ paths:
           $ref: "#/responses/NotAuthorized"
         "500":
           $ref: "#/responses/InternalServer"
-  "/feeds/user/{userId}":
-    get:
-      operationId: users_feeds_list
-      tags:
-        - feeds
-      summary: Get users feeds list
-      parameters:
-        - $ref: "#/components/parameters/NextCursor"
-        - $ref: "#/components/parameters/Size"
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: ""
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/Pagination"
-                  - type: object
-                    properties:
-                      items:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/UserModel"
-        "400":
-          $ref: "#/responses/BadRequest"
-        "401":
-          $ref: "#/responses/NotAuthorized"
-        "404":
-          $ref: "#/responses/NotFound"
-        "500":
-          $ref: "#/responses/InternalServer"
-  "/feeds/my":
-    get:
-      operationId: my_feeds_list
-      tags:
-        - feeds
-      summary: Get my feeds list
-      parameters:
-        - $ref: "#/components/parameters/NextCursor"
-        - $ref: "#/components/parameters/Size"
-      responses:
-        "200":
-          description: ""
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/Pagination"
-                  - type: object
-                    properties:
-                      items:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/UserModel"
-        "400":
-          $ref: "#/responses/BadRequest"
-        "401":
-          $ref: "#/responses/NotAuthorized"
-        "404":
-          $ref: "#/responses/NotFound"
-        "500":
-          $ref: "#/responses/InternalServer"
-  "/feeds/my/{feedId}":
+  "/posts/{postId}":
     put:
-      operationId: update_my_feed
+      operationId: feed_post_update
       tags:
         - feeds
-      summary: Update my feed
+      summary: Update my post
       parameters:
-        - name: feedId
+        - name: postId
           in: path
           required: true
           schema:
@@ -338,12 +261,12 @@ paths:
         "500":
           $ref: "#/responses/InternalServer"
     delete:
-      operationId: remove_my_feed
+      operationId: feed_post_remove
       tags:
         - feeds
-      summary: Remove my feed
+      summary: Remove my post
       parameters:
-        - name: feedId
+        - name: postId
           in: path
           required: true
           schema:
@@ -495,6 +418,8 @@ paths:
                   - $ref: "#/components/schemas/Pagination"
                   - type: object
                     properties:
+                      lastReadedMessageDate:
+                        type: string
                       items:
                         type: array
                         items:
@@ -781,6 +706,15 @@ components:
         content:
           type: string
           example: News
+        uploads:
+          type: array
+          items:
+            type: object
+            properties:
+              path:
+                type: string
+              id:
+                type: string
         createdAt:
           type: string
           example: "YYYY-MM-DDTHH:mm:ss"
@@ -799,8 +733,6 @@ components:
         content:
           type: string
           example: News
-        isRead:
-          type: boolean
         createdAt:
           type: string
           example: "YYYY-MM-DDTHH:mm:ss"
@@ -808,7 +740,6 @@ components:
         - id
         - user
         - content
-        - isRead
         - createdAt
 
     ChatPersonalModel:
