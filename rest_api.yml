@@ -1,0 +1,787 @@
+openapi: 3.0.0
+info:
+  title: VK API
+  description: The VK API description
+  version: "1.0"
+  contact: {}
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: users
+    description: "Users"
+  - name: feeds
+    description: "Feeds"
+  - name: chats
+    description: "Chats"
+  - name: uploads
+    description: "Uploads"
+
+paths:
+  "/users":
+    get:
+      operationId: users_list
+      tags:
+        - users
+      summary: Get users list
+      parameters:
+        - $ref: "#/components/parameters/NextCursor"
+        - $ref: "#/components/parameters/Size"
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Pagination"
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/UserModel"
+        "400":
+          $ref: "#/responses/BadRequest"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "500":
+          $ref: "#/responses/InternalServer"
+  "/users/friends":
+    get:
+      operationId: friends_list
+      tags:
+        - users
+      summary: Get my friends list or friends of other user
+      parameters:
+        - $ref: "#/components/parameters/NextCursor"
+        - $ref: "#/components/parameters/Size"
+        - name: userId
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Pagination"
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/UserModel"
+        "400":
+          $ref: "#/responses/BadRequest"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "500":
+          $ref: "#/responses/InternalServer"
+  "/users/friends/{friendId}":
+    delete:
+      operationId: remove_my_friend
+      tags:
+        - users
+      summary: Remove my friend
+      parameters:
+        - name: friendId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: ""
+        "404":
+          $ref: "#/responses/NotFound"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "500":
+          $ref: "#/responses/InternalServer"
+  "/users/{userId}":
+    get:
+      operationId: user_info
+      tags:
+        - users
+      summary: Get user info
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  fullName:
+                    type: string
+                    example: Ivanov Ivan
+                  cityName:
+                    type: string
+                  lastSeenAt:
+                    type: string
+                required:
+                  - id
+                  - fullName
+                  - cityName
+                  - lastSeenAt
+        "400":
+          $ref: "#/responses/BadRequest"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "404":
+          $ref: "#/responses/NotFound"
+        "500":
+          $ref: "#/responses/InternalServer"
+
+  "/feeds":
+    get:
+      operationId: feeds_list
+      tags:
+        - feeds
+      summary: Get my feeds list or users feeds
+      parameters:
+        - $ref: "#/components/parameters/NextCursor"
+        - $ref: "#/components/parameters/Size"
+        - name: userId
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Pagination"
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          allOf:
+                            - $ref: "#/components/schemas/FeedModel"
+                            - properties:
+                                user:
+                                  $ref: "#/components/schemas/UserModel"
+        "400":
+          $ref: "#/responses/BadRequest"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "500":
+          $ref: "#/responses/InternalServer"
+  "/posts":
+    post:
+      operationId: feed_post_create
+      tags:
+        - feeds
+      summary: Create a new post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                uploadsIds:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+        "400":
+          $ref: "#/responses/BadRequest"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "500":
+          $ref: "#/responses/InternalServer"
+  "/posts/{postId}":
+    put:
+      operationId: feed_post_update
+      tags:
+        - feeds
+      summary: Update my post
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                uploadsIds:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+        "400":
+          $ref: "#/responses/BadRequest"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "500":
+          $ref: "#/responses/InternalServer"
+    delete:
+      operationId: feed_post_remove
+      tags:
+        - feeds
+      summary: Remove my post
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: ""
+        "404":
+          $ref: "#/responses/NotFound"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "500":
+          $ref: "#/responses/InternalServer"
+
+  "/chats":
+    get:
+      operationId: chats_list
+      tags:
+        - chats
+      summary: Get chats list
+      parameters:
+        - $ref: "#/components/parameters/NextCursor"
+        - $ref: "#/components/parameters/Size"
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Pagination"
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          properties:
+                            id:
+                              type: string
+                            title:
+                              type: string
+                            unreadCount:
+                              type: number
+                            type:
+                              type: string
+                              enum:
+                                - personal
+                                - group
+                            lastMessage:
+                              $ref: "#/components/schemas/MessageModel"
+        "400":
+          $ref: "#/responses/BadRequest"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "500":
+          $ref: "#/responses/InternalServer"
+    post:
+      operationId: chats_create
+      tags:
+        - chats
+      summary: Create new chat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  enum:
+                    - personal
+                    - group
+                userId:
+                  type: string
+                usersIds:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+        "400":
+          $ref: "#/responses/BadRequest"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "404":
+          $ref: "#/responses/NotFound"
+        "500":
+          $ref: "#/responses/InternalServer"
+  "/chats/{chatId}":
+    get:
+      operationId: chat_info
+      tags:
+        - chats
+      summary: Get chat info
+      parameters:
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "Personal chat info"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ChatPersonalModel"
+                  - $ref: "#/components/schemas/ChatGroupModel"
+        "400":
+          $ref: "#/responses/BadRequest"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "404":
+          $ref: "#/responses/NotFound"
+        "500":
+          $ref: "#/responses/InternalServer"
+
+  "/chats/{chatId}/messages":
+    get:
+      operationId: chats_messages_list
+      tags:
+        - chats
+      summary: Get chat messages list
+      parameters:
+        - $ref: "#/components/parameters/NextCursor"
+        - $ref: "#/components/parameters/Size"
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Pagination"
+                  - type: object
+                    properties:
+                      lastReadedMessageDate:
+                        type: string
+                      items:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/MessageModel"
+        "400":
+          $ref: "#/responses/BadRequest"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "404":
+          $ref: "#/responses/NotFound"
+        "500":
+          $ref: "#/responses/InternalServer"
+  "/chats/{chatId}/messages/{messageId}":
+    put:
+      operationId: update_my_message
+      tags:
+        - chats
+      summary: Update my message
+      parameters:
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: messageId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+        "400":
+          $ref: "#/responses/BadRequest"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "500":
+          $ref: "#/responses/InternalServer"
+    delete:
+      operationId: remove_my_message
+      tags:
+        - chats
+      summary: Remove my message
+      parameters:
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: messageId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: isForEveryone
+          in: query
+          required: true
+          schema:
+            type: boolean
+      responses:
+        "204":
+          description: ""
+        "404":
+          $ref: "#/responses/NotFound"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "500":
+          $ref: "#/responses/InternalServer"
+  "/chats/messages":
+    post:
+      operationId: message_create
+      tags:
+        - chats
+      summary: Create chat message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                chatId:
+                  type: string
+                userId:
+                  type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+        "400":
+          $ref: "#/responses/BadRequest"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "404":
+          $ref: "#/responses/NotFound"
+        "500":
+          $ref: "#/responses/InternalServer"
+
+  "/uploads":
+    post:
+      operationId: upload_create
+      tags:
+        - uploads
+      summary: Create upload
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+        "400":
+          $ref: "#/responses/BadRequest"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "500":
+          $ref: "#/responses/InternalServer"
+  "/uploads/{uploadId}/file":
+    get:
+      operationId: uploads_file
+      tags:
+        - uploads
+      summary: Get uploaded file
+      parameters:
+        - name: uploadId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/file:
+              schema:
+                type: string
+                format: binary
+        "400":
+          $ref: "#/responses/BadRequest"
+        "401":
+          $ref: "#/responses/NotAuthorized"
+        "404":
+          $ref: "#/responses/NotFound"
+        "500":
+          $ref: "#/responses/InternalServer"
+
+responses:
+  BadRequest:
+    description: Bad request exception
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            timestamp:
+              type: string
+            message:
+              type: string
+            fields:
+              type: object
+              properties:
+                field:
+                  type: array
+                  items:
+                    type: string
+  NotAuthorized:
+    description: The requester is unauthorized.
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            timestamp:
+              type: string
+            message:
+              type: string
+  NotFound:
+    description: Not found error.
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            timestamp:
+              type: string
+            message:
+              type: string
+  InternalServer:
+    description: Internal server error.
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            timestamp:
+              type: string
+            message:
+              type: string
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT # optional, for documentation purposes only
+
+  parameters:
+    NextCursor:
+      name: nextCursor
+      required: false
+      in: query
+      schema:
+        type: string
+    Size:
+      name: size
+      required: false
+      in: query
+      schema:
+        type: number
+
+  schemas:
+    Pagination:
+      type: object
+      properties:
+        nextCursor:
+          type: string
+        size:
+          type: number
+
+    UserModel:
+      type: object
+      properties:
+        id:
+          type: string
+        fullName:
+          type: string
+          example: Ivanov Ivan
+      required:
+        - id
+        - fullName
+
+    FeedModel:
+      type: object
+      properties:
+        id:
+          type: string
+        content:
+          type: string
+          example: News
+        uploads:
+          type: array
+          items:
+            type: object
+            properties:
+              path:
+                type: string
+              id:
+                type: string
+        createdAt:
+          type: string
+          example: "YYYY-MM-DDTHH:mm:ss"
+      required:
+        - id
+        - content
+        - createdAt
+
+    MessageModel:
+      type: object
+      properties:
+        id:
+          type: string
+        user:
+          $ref: "#/components/schemas/UserModel"
+        content:
+          type: string
+          example: News
+        createdAt:
+          type: string
+          example: "YYYY-MM-DDTHH:mm:ss"
+      required:
+        - id
+        - user
+        - content
+        - createdAt
+
+    ChatPersonalModel:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        unreadCount:
+          type: number
+        user:
+          $ref: "#/components/schemas/UserModel"
+        createdAt:
+          type: string
+          example: "YYYY-MM-DDTHH:mm:ss"
+      required:
+        - id
+        - title
+        - unreadCount
+        - user
+        - createdAt
+
+    ChatGroupModel:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        unreadCount:
+          type: number
+        users:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserModel"
+        createdAt:
+          type: string
+          example: "YYYY-MM-DDTHH:mm:ss"
+      required:
+        - id
+        - title
+        - unreadCount
+        - users
+        - createdAt
