@@ -45,3 +45,9 @@ Initial storage with replication and backups = 2.4 PB
 HDD disk capacity = 6 TB
 Number of HDD disks with replication = 400
 Number of shards = 25 with 2 factor replication
+
+## Design overview
+
+<p align="center">
+  <img alt="System context diagram" src="./architecture/context.png"/>
+</p>

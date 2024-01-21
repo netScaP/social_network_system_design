@@ -1,0 +1,14 @@
+@startuml
+!include <C4/C4_Container>
+
+Person(user, "User")
+Container(userSystem, "User System", "Software system", "User profiles and relations")
+Container(mediaSystem, "Media System", "Software system", "Manage media files")
+Container(postSystem, "Post System", "Software system", "Posts and user feeds")
+Container(messageSystem, "Message System", "Software system", "Chat messages")
+
+Rel(user, userSystem, "Views user's profile, friends")
+Rel(user, postSystem, "Publishes posts, views home and user feeds")
+Rel(user, mediaSystem, "Manage media files")
+Rel(user, messageSystem, "Views chats, sends and reads messages")
+@enduml
